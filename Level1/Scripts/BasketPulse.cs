@@ -5,27 +5,33 @@ using UnityEngine;
 
 public class BasketPulse : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    // AudioClips
+    [SerializeField] private AudioClip rightChoice;
 
     private void OnTriggerEnter2D(Collider2D col)
     {
-        StartCoroutine(SomethingEnteredAnimation());
+        if (Level1GameManager.tutorialMode)
+        {
+            GetComponent<Animator>().SetBool("SomethingEntered", true);
+            AudioSource.PlayClipAtPoint(rightChoice, Camera.main.transform.position);
+        }
+        else
+        {
+            GetComponent<Animator>().SetBool("SomethingHovered", true);
+            Level1GameManager.basketHovered = true;
+        }
     }
-
-    IEnumerator SomethingEnteredAnimation()
+    
+    private void OnTriggerExit2D(Collider2D col)
     {
-        GetComponent<Animator>().SetBool("SomethingEntered", true);
-        yield return new WaitForSeconds(0.5f);
-        GetComponent<Animator>().SetBool("SomethingEntered", false);
+        if (Level1GameManager.tutorialMode)
+        {
+            GetComponent<Animator>().SetBool("SomethingEntered", false);
+        }
+        else
+        {
+            GetComponent<Animator>().SetBool("SomethingHovered", false);
+            Level1GameManager.basketHovered = false;
+        }
     }
 }
