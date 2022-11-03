@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,7 +14,9 @@ public class Level1GameManager : MonoBehaviour
     [SerializeField] private GameObject trash;
     [SerializeField] private GameObject testPrefab;
     [SerializeField] private Text resultText;
+    [SerializeField] private Text stageText;
     [SerializeField] private GameObject restartButton;
+    [SerializeField] private GameObject clickToStartButton;
     
     // Flags
     public static bool tutorialMode = true;
@@ -22,6 +25,7 @@ public class Level1GameManager : MonoBehaviour
     
     public static int negativeScore = 0;
     public static bool negativeScoreLocked = false;
+    public static bool noMistake = true;
     
     public static bool basketHovered = false;
     public static bool trashHovered = false;
@@ -350,6 +354,14 @@ public class Level1GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //StartCoroutine(StartLevel1());
+    }
+
+    public void StartLevel1Wrapper()
+    {
+        clickToStartButton.SetActive(false);
+        basket.SetActive(true);
+        stageText.gameObject.SetActive(true);
         StartCoroutine(StartLevel1());
     }
 
@@ -361,7 +373,7 @@ public class Level1GameManager : MonoBehaviour
 
     void NextMove()
     {
-        if (eligibleToPlay)
+        if (eligibleToPlay && FarakhnaActualScore < 8)
         {
             if (tutorialMode)
             {
@@ -376,11 +388,12 @@ public class Level1GameManager : MonoBehaviour
         {
             basket.SetActive(false);
             restartButton.SetActive(true);
-            resultText.text = "FarakhnaScore: " + (FarakhnaActualScore + 1) + "\n"
-                              + "EffortScore: " + EffortScore + "\n"
-                              + "DeletionError: " + DeletionError + "\n"
-                              + "SelectionError: " + SelectionError + "\n"
-                              + "RepetitionError: " + RepetitionError;
+            stageText.gameObject.SetActive(false);
+            resultText.text = "Farakhna Score: " + (FarakhnaActualScore + 1) + "\n"
+                              + "Effort Score: " + EffortScore + "\n"
+                              + "Deletion Error: " + DeletionError + "\n"
+                              + "Selection Error: " + SelectionError + "\n"
+                              + "Repetition Error: " + RepetitionError;
         }
     }
 
@@ -393,7 +406,7 @@ public class Level1GameManager : MonoBehaviour
             tempGameObject.AddComponent<GroceryAnimation>();
             tempGameObject.GetComponent<SpriteRenderer>().sortingOrder = 2;
             yield return new WaitForSeconds(2.0f);
-            StartCoroutine(TransformToBasket(tempGameObject, 180));
+            StartCoroutine(TranslateToBasket(tempGameObject, 1));
             yield return new WaitForSeconds(1.0f);
         }
 
@@ -404,10 +417,12 @@ public class Level1GameManager : MonoBehaviour
         yield break;
     }
 
-    IEnumerator TransformToBasket(GameObject transformGameObject, int totalFrames)
+    IEnumerator TranslateToBasket(GameObject transformGameObject, int totalSeconds)
     {
+        int totalFrames = Mathf.RoundToInt(totalSeconds/Time.deltaTime);
         Vector3 tgoCurrentPosition = transformGameObject.transform.position;
         int frameCount = 0;
+        Destroy(transformGameObject.GetComponent<GroceryAnimation>());
         while (true)
         {
             float frameContinuum = (float)frameCount / totalFrames;
@@ -424,7 +439,8 @@ public class Level1GameManager : MonoBehaviour
                 transformGameObject.SetActive(false);
                 transformGameObject.transform.position = tgoCurrentPosition;
                 transformGameObject.GetComponent<SpriteRenderer>().sortingOrder = 1;
-                Destroy(transformGameObject.GetComponent<GroceryAnimation>());
+                transformGameObject.transform.localScale = new Vector3(
+                    0.3f, 0.3f, 1.0f);
                 yield break;
             }
         }
@@ -498,27 +514,29 @@ public class Level1GameManager : MonoBehaviour
                     }
                     else
                     {
-                        if (FarakhnaActualScore < 8)
-                        {
-                            if (negativeScore > 1)
-                            {
-                                eligibleToPlay = false;
-                            }
-                            else
-                            {
-                                tempAct = 0;
-                                negativeScore = 0;
-                                FarakhnaActualScore++;
-                            }
-                        }
-                        else
+                        if (negativeScore > 1)
                         {
                             eligibleToPlay = false;
                         }
-
+                        else
+                        {
+                            tempAct = 0;
+                            negativeScore = 0;
+                            FarakhnaActualScore++;
+                            stageText.text = "Farakhna: " + (FarakhnaActualScore + 2);
+                        }
                     }
 
                     negativeScoreLocked = false;
+                    if (noMistake)
+                    {
+                        EffortScore++;
+                    }
+                    else
+                    {
+                        noMistake = true;
+                    }
+
                     NextMove();
                     yield break;
                 }

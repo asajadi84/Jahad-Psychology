@@ -35,11 +35,11 @@ public class TestPrefab : MonoBehaviour
         {
             if (isRight)
             {
-                Level1GameManager.EffortScore++;
                 AudioSource.PlayClipAtPoint(rightChoice, Camera.main.transform.position);
             }else if (isWrongSelection)
             {
                 Level1GameManager.SelectionError++;
+                Level1GameManager.noMistake = false;
                 AudioSource.PlayClipAtPoint(wrongChoice, Camera.main.transform.position);
                 if (!Level1GameManager.negativeScoreLocked)
                 {
@@ -49,6 +49,7 @@ public class TestPrefab : MonoBehaviour
             }else if (isWrongRepetition)
             {
                 Level1GameManager.RepetitionError++;
+                Level1GameManager.noMistake = false;
                 AudioSource.PlayClipAtPoint(wrongChoice, Camera.main.transform.position);
                 if (!Level1GameManager.negativeScoreLocked)
                 {
@@ -64,6 +65,7 @@ public class TestPrefab : MonoBehaviour
             if (isRight)
             {
                 Level1GameManager.DeletionError++;
+                Level1GameManager.noMistake = false;
                 AudioSource.PlayClipAtPoint(wrongChoice, Camera.main.transform.position);
                 if (!Level1GameManager.negativeScoreLocked)
                 {
@@ -72,11 +74,9 @@ public class TestPrefab : MonoBehaviour
                 }
             }else if (isWrongSelection)
             {
-                Level1GameManager.EffortScore++;
                 AudioSource.PlayClipAtPoint(rightChoice, Camera.main.transform.position);
             }else if (isWrongRepetition)
             {
-                Level1GameManager.EffortScore++;
                 AudioSource.PlayClipAtPoint(rightChoice, Camera.main.transform.position);
             }
 
